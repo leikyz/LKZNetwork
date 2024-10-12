@@ -1,0 +1,43 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.33516.290
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LKZNetwork", "LKZNetwork\LKZNetwork.csproj", "{CAD59DDE-D480-47C6-A3B8-51BF13C81A8C}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LKZ.Server", "LKZ.Server\LKZ.Server.csproj", "{F6296397-235B-4D75-AB4C-DF01B01D073B}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LKZ.Common", "LKZ.Common\LKZ.Common.csproj", "{9AD01C84-A24D-4978-9324-62423EEF3B73}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LKZ.Client", "LKZ.Client\LKZ.Client.csproj", "{FBDED374-5B68-4367-A96D-0F5DC0F71EC5}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{CAD59DDE-D480-47C6-A3B8-51BF13C81A8C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CAD59DDE-D480-47C6-A3B8-51BF13C81A8C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CAD59DDE-D480-47C6-A3B8-51BF13C81A8C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CAD59DDE-D480-47C6-A3B8-51BF13C81A8C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F6296397-235B-4D75-AB4C-DF01B01D073B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F6296397-235B-4D75-AB4C-DF01B01D073B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F6296397-235B-4D75-AB4C-DF01B01D073B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F6296397-235B-4D75-AB4C-DF01B01D073B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9AD01C84-A24D-4978-9324-62423EEF3B73}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9AD01C84-A24D-4978-9324-62423EEF3B73}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9AD01C84-A24D-4978-9324-62423EEF3B73}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9AD01C84-A24D-4978-9324-62423EEF3B73}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FBDED374-5B68-4367-A96D-0F5DC0F71EC5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FBDED374-5B68-4367-A96D-0F5DC0F71EC5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FBDED374-5B68-4367-A96D-0F5DC0F71EC5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FBDED374-5B68-4367-A96D-0F5DC0F71EC5}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {15A5659D-7F18-476C-BB37-E8AAD733B15D}
+	EndGlobalSection
+EndGlobal
