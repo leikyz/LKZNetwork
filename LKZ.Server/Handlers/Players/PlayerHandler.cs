@@ -16,19 +16,9 @@ namespace LKZ.Server.Handlers.Players
         {
 
             int sendId = Int32.Parse(parameters[1]);
-
-            BaseServer.TriggerClientsEvent(sendId, parameters[0], parameters[1]);
-
-            //BaseServer.ListClients();
-
-            byte[] data = Encoding.ASCII.GetBytes(parameters[2]);
-            receiver.GetStream().Write(data, 0, data.Length);
-
-            //NetworkStream stream = receiver.GetStream();
-
-
-            //byte[] data = Encoding.ASCII.GetBytes(parameters[2]);
-            //stream.Write(data, 0, data.Length);
+            Console.WriteLine("test");
+            BaseServer.TriggerClientEvent(1, "PlayerCreatedMessage");
+           // BaseServer.TriggerClientsEvent(sendId, parameters[0], parameters[1]);
         }
 
     }

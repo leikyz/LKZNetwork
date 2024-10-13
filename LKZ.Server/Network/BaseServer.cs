@@ -46,7 +46,7 @@ namespace LKZ.Server.Network
 
         private static void RegisterEvents()
         {
-            EventManager.RegisterEvent("PlayerCreated", PlayerHandler.HandlePlayerCreatedMessage);
+            EventManager.RegisterEvent("PlayerCreatedMessage", PlayerHandler.HandlePlayerCreatedMessage);
             EventManager.RegisterEvent("SendPrivateChatMessage", ChatHandler.HandleChatMessageMessage);
         }
 
@@ -156,7 +156,7 @@ namespace LKZ.Server.Network
 
             byte[] data = Encoding.ASCII.GetBytes(fullMessage);
             tcpClient.GetStream().Write(data, 0, data.Length);
-           // Thread.Sleep(TimeBetweenMessage);
+           //Thread.Sleep(TimeBetweenMessage);
         }
 
         public static void TriggerClientsEvent(int clientId, string eventName, params object[] parameters)
