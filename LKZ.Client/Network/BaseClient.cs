@@ -52,22 +52,6 @@ namespace LKZ.Network.Client.Network
             Console.WriteLine("Sent to server: " + message);
         }
 
-        //public void SendMessage(int targetClientId, string message)
-        //{
-        //    TcpClient client = BaseServer.GetTcpClient(targetClientId);
-        //    if (client != null)
-        //    {
-        //        NetworkStream stream = client.GetStream();
-        //        byte[] data = Encoding.ASCII.GetBytes(message);
-        //        stream.Write(data, 0, data.Length);
-        //        Console.WriteLine($"Forwarded message to Client {targetClientId}: {message}");
-        //    }
-        //    else
-        //    {
-        //        Console.WriteLine($"Client {targetClientId} not found.");
-        //    }
-        //}
-
         private void ReceiveMessages()
         {
             try
@@ -83,8 +67,6 @@ namespace LKZ.Network.Client.Network
                     }
 
                     string responseMessage = Encoding.ASCII.GetString(buffer, 0, bytesRead);
-                    Console.WriteLine("Received from server: " + responseMessage);
-
                     OnDataReceived?.Invoke(this, responseMessage);
                 }
             }
@@ -110,7 +92,7 @@ namespace LKZ.Network.Client.Network
 
         private void HandleDataReceived(object sender, string message)
         {
-            Console.WriteLine("Message received : " + message);
+            Console.WriteLine($"Message received ({message})");
         }
     }
 }

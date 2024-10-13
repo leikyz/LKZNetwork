@@ -9,7 +9,6 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Test with one client
         BaseClient client = new BaseClient(1);
         client.Connect("127.0.0.1", 5000);
 
@@ -17,7 +16,7 @@ class Program
         client2.Connect("127.0.0.1", 5000);
 
 
-        client.TriggerServerEvent(1, "SendChatMessage", 2, "wsh");
+        client.TriggerServerEvent(1, "SendPrivateChatMessage", 2, "wsh");
 
         Console.WriteLine("Press Ctrl+C to exit...");
         while (true)

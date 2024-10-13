@@ -31,10 +31,10 @@ namespace LKZ.Network.Common.Events
 
             if (events.ContainsKey(eventName))
             {
-                string[] args = content.Skip(1).ToArray(); // Skip the first two elements (event name and client ID)
+                //string[] args = content.Skip(1).ToArray(); // Skip the first two elements (event name and client ID)
                 foreach (var function in events[eventName])
                 {
-                    function.Invoke(args);
+                    function.Invoke(content);
                 }
             }
         }

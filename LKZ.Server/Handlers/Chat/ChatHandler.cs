@@ -14,13 +14,17 @@ namespace LKZ.Server.Handlers.Chat
     {
         static public void HandleChatMessageMessage(string[] parameters)
         {
-            TcpClient sender = BaseServer.GetTcpClient(Int32.Parse(parameters[0]));
-            TcpClient receiver = BaseServer.GetTcpClient(Int32.Parse(parameters[1]));
+            Console.WriteLine(parameters[0]);
+            Console.WriteLine(parameters[1]);
+            Console.WriteLine(parameters[2]);
+            Console.WriteLine(parameters[3]);
+            //TcpClient sender = BaseServer.GetTcpClient(Int32.Parse(parameters[0]));
+            //TcpClient receiver = BaseServer.GetTcpClient(Int32.Parse(parameters[1]));
 
-            //BaseServer.ListClients();
+            ////BaseServer.ListClients();
 
-            byte[] data = Encoding.ASCII.GetBytes(parameters[2]);
-            receiver.GetStream().Write(data, 0, data.Length);
+            //byte[] data = Encoding.ASCII.GetBytes(parameters[2]);
+            //receiver.GetStream().Write(data, 0, data.Length);
 
             //NetworkStream stream = receiver.GetStream();
 

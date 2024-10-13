@@ -14,7 +14,7 @@ namespace LKZ.Network.Server
             Thread serverThread = new Thread(() => BaseServer.Start("127.0.0.1", 5000));
             serverThread.Start();
 
-            EventManager.RegisterEvent("SendChatMessage", ChatHandler.HandleChatMessageMessage);
+            
 
             Thread.Sleep(1000);
             Console.ReadLine();

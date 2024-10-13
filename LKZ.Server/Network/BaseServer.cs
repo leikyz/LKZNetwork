@@ -1,6 +1,9 @@
 ﻿using LKZ.Network.Common.Events;
+using LKZ.Server.Handlers.Chat;
+using LKZ.Server.Handlers.Players;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
@@ -34,9 +37,17 @@ namespace LKZ.Server.Network
             OnClientConnected += HandleClientConnected;
             OnClientDisconnected += HandleClientDisconnected;
             OnDataReceived += HandleDataReceived;
-
+            
             // Continuously accept new clients in a loop
             Task.Run(() => AcceptClients());
+
+            RegisterEvents();
+        }
+
+        private static void RegisterEvents()
+        {
+            EventManager.RegisterEvent("PlayerCreated", PlayerHandler.HandlePlayerCreatedMessage);
+            EventManager.RegisterEvent("SendPrivateChatMessage", ChatHandler.HandleChatMessageMessage);
         }
 
         private static async Task AcceptClients()
@@ -78,7 +89,6 @@ namespace LKZ.Server.Network
                 }
             }
 
-            // Optionally raise the client disconnected event
             OnClientDisconnected?.Invoke(null, client);
         }
 
@@ -138,7 +148,30 @@ namespace LKZ.Server.Network
             }
         }
 
-        // New method to list all clients
+        public static void TriggerClientEvent(int clientId, string eventName, params object[] parameters)
+        {
+            TcpClient tcpClient = GetTcpClient(clientId);
+            string paramStr = string.Join(",", parameters);
+            string fullMessage = $"{eventName}|{clientId}|{paramStr}"; // Change the order
+
+            byte[] data = Encoding.ASCII.GetBytes(fullMessage);
+            tcpClient.GetStream().Write(data, 0, data.Length);
+           // Thread.Sleep(TimeBetweenMessage);
+        }
+
+        public static void TriggerClientsEvent(int clientId, string eventName, params object[] parameters)
+        {
+            string paramStr = string.Join(",", parameters);
+            string fullMessage = $"{eventName}|{clientId}|{paramStr}"; // Change the order
+
+            byte[] data = Encoding.ASCII.GetBytes(fullMessage);
+
+            foreach (var client in clients)
+            {
+                client.Value.GetStream().Write(data, 0, data.Length);
+            }
+        }
+
         public static void ListClients()
         {
             if (clients.Count == 0)
