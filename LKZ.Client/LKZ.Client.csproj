@@ -10,4 +10,8 @@
     <Folder Include="Handlers\Approach\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\LKZ.Server\LKZ.Server.csproj" />
+  </ItemGroup>
+
 </Project>

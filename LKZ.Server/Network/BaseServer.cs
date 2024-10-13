@@ -62,61 +62,47 @@ namespace LKZ.Server.Network
 
         private static void HandleClient(TcpClient client)
         {
-            try
+            using (NetworkStream stream = client.GetStream())
             {
-                using (NetworkStream stream = client.GetStream())
+                byte[] buffer = new byte[1024];
+
+                while (client.Connected)
                 {
-                    byte[] buffer = new byte[1024];
-                    int bytesRead;
+                    int bytesRead = stream.Read(buffer, 0, buffer.Length);
 
-                    // Continuously read from the client
-                    while ((bytesRead = stream.Read(buffer, 0, buffer.Length)) != 0)
-                    {
-                        string message = Encoding.ASCII.GetString(buffer, 0, bytesRead);
+                    if (bytesRead == 0)
+                        break; // if there is no data
 
-                        // Raise OnDataReceived event
-                        OnDataReceived?.Invoke(null, message, client);
-                    }
+                    string message = Encoding.ASCII.GetString(buffer, 0, bytesRead);
+                    OnDataReceived?.Invoke(null, message, client);
                 }
             }
-            catch (Exception ex)
-            {
-                Console.WriteLine("Error handling client: " + ex.Message);
-            }
-            finally
-            {
-                // Raise OnClientDisconnected event
-                OnClientDisconnected?.Invoke(null, client);
-                Console.WriteLine("Client disconnected.");
-                client.Close();
-            }
+
+            // Optionally raise the client disconnected event
+            OnClientDisconnected?.Invoke(null, client);
         }
 
-        // Event handler for client connected
         public static void HandleClientConnected(object sender, TcpClient client)
         {
-            // You can log or manage connected clients here
             Console.WriteLine($"TCPClient {client.Client.RemoteEndPoint} connected.");
         }
 
-        // Event handler for client disconnected
         public static void HandleClientDisconnected(object sender, TcpClient client)
         {
             Console.WriteLine("A client has disconnected.");
         }
 
-        // Event handler for data received
         private static void HandleDataReceived(object sender, string message, TcpClient client)
         {
             var parts = message.Split('|');
 
-            if (parts[1] == "ClientCreatedMessage")
+            if (parts[0] == "ClientCreatedMessage")
             {
-                AddClient(Int32.Parse(parts[0]), client);
+                AddClient(Int32.Parse(parts[1]), client);
             }
 
             EventManager.TriggerRaw(message);
-            Console.WriteLine($"Message received ({parts[0]}) : {parts[1] + " " + "(" + parts[2]}" + ")");
+            Console.WriteLine($"Message received ({parts[1]}): {parts[0]} ({parts[2]})");
         }
 
         public static void AddClient(int id, TcpClient client)
@@ -139,5 +125,33 @@ namespace LKZ.Server.Network
             }
         }
 
+        public static TcpClient GetTcpClient(int id)
+        {
+            if (clients.TryGetValue(id, out TcpClient client))
+            {
+                return client;
+            }
+            else
+            {
+                Console.WriteLine($"Client with ID {id} not found.");
+                return null;
+            }
+        }
+
+        // New method to list all clients
+        public static void ListClients()
+        {
+            if (clients.Count == 0)
+            {
+                Console.WriteLine("No clients connected.");
+                return;
+            }
+
+            Console.WriteLine("Connected clients:");
+            foreach (var client in clients)
+            {
+                Console.WriteLine($"Client ID: {client.Key}, Remote EndPoint: {client.Value.Client.RemoteEndPoint}");
+            }
+        }
     }
 }

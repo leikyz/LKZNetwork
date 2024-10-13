@@ -1,4 +1,5 @@
-﻿using System;
+﻿using LKZ.Server.Network;
+using System;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
@@ -7,23 +8,24 @@ namespace LKZ.Network.Client.Network
 {
     public class BaseClient
     {
+        private const int TimeBetweenMessage = 40; // ms
+
         private TcpClient client = null;
         private NetworkStream stream = null;
         private int id;
+     
 
-        // Event delegate for data received
         public delegate void DataReceivedEventHandler(object sender, string message);
 
-        // Event for data received
         public event DataReceivedEventHandler OnDataReceived;
 
         public BaseClient(int id)
         {
             this.id = id;
-
-            // Subscribe to the OnDataReceived event
             OnDataReceived += HandleDataReceived;
         }
+
+        public int Id { get { return id; } }
 
         public void Connect(string ipAddress, int port)
         {
@@ -31,7 +33,8 @@ namespace LKZ.Network.Client.Network
             stream = client.GetStream();
             Console.WriteLine("Connected to the server.");
 
-            // Start receiving data in a separate task
+            TriggerServerEvent(id, "ClientCreatedMessage");
+
             Task.Run(() => ReceiveMessages());
         }
 
@@ -42,7 +45,6 @@ namespace LKZ.Network.Client.Network
             Console.WriteLine("Client connection closed.");
         }
 
-        // Send a message to the server
         public void SendMessage(string message)
         {
             byte[] data = Encoding.ASCII.GetBytes(message);
@@ -50,7 +52,22 @@ namespace LKZ.Network.Client.Network
             Console.WriteLine("Sent to server: " + message);
         }
 
-        // Receive messages from the server
+        //public void SendMessage(int targetClientId, string message)
+        //{
+        //    TcpClient client = BaseServer.GetTcpClient(targetClientId);
+        //    if (client != null)
+        //    {
+        //        NetworkStream stream = client.GetStream();
+        //        byte[] data = Encoding.ASCII.GetBytes(message);
+        //        stream.Write(data, 0, data.Length);
+        //        Console.WriteLine($"Forwarded message to Client {targetClientId}: {message}");
+        //    }
+        //    else
+        //    {
+        //        Console.WriteLine($"Client {targetClientId} not found.");
+        //    }
+        //}
+
         private void ReceiveMessages()
         {
             try
@@ -68,7 +85,6 @@ namespace LKZ.Network.Client.Network
                     string responseMessage = Encoding.ASCII.GetString(buffer, 0, bytesRead);
                     Console.WriteLine("Received from server: " + responseMessage);
 
-                    // Raise the OnDataReceived event
                     OnDataReceived?.Invoke(this, responseMessage);
                 }
             }
@@ -85,17 +101,16 @@ namespace LKZ.Network.Client.Network
         public void TriggerServerEvent(int clientId, string eventName, params object[] parameters)
         {
             string paramStr = string.Join(",", parameters);
-            string fullMessage = $"{clientId}|{eventName}|{paramStr}";
+            string fullMessage = $"{eventName}|{clientId}|{paramStr}"; // Change the order
 
             byte[] data = Encoding.ASCII.GetBytes(fullMessage);
             stream.Write(data, 0, data.Length);
+            Thread.Sleep(TimeBetweenMessage);
         }
 
-
-        // Method to handle the data received event
         private void HandleDataReceived(object sender, string message)
         {
-            Console.WriteLine("Data received: " + message);
+            Console.WriteLine("Message received : " + message);
         }
     }
 }

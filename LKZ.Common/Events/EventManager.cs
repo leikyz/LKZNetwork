@@ -26,12 +26,12 @@ namespace LKZ.Network.Common.Events
                 return;
             }
 
-            string clientId = content[0]; // Get the client ID
-            string eventName = content[1]; // Get the event name
+            string eventName = content[0]; // Get the event name
+            string clientId = content[1]; // Get the client ID
 
             if (events.ContainsKey(eventName))
             {
-                string[] args = content.Skip(2).ToArray(); // Skip the first two elements (client ID and event name)
+                string[] args = content.Skip(1).ToArray(); // Skip the first two elements (event name and client ID)
                 foreach (var function in events[eventName])
                 {
                     function.Invoke(args);
@@ -39,19 +39,19 @@ namespace LKZ.Network.Common.Events
             }
         }
 
-        public static void Trigger(string clientId, string name, string[] args)
+        public static void Trigger(string clientId, string name, params string[] args)
         {
-            TriggerRaw(Serialize(clientId, name, args));
+            TriggerRaw(Serialize(name, clientId, args)); // Event name comes first
         }
 
-        public static string Serialize(string clientId, string eventName, params object[] parameters)
+        public static string Serialize(string eventName, string clientId, params object[] parameters)
         {
             if (parameters != null && parameters.Length > 0)
             {
                 string paramStr = string.Join(",", parameters);
-                return $"{clientId}|{eventName}|{paramStr}";
+                return $"{eventName}|{clientId}|{paramStr}";
             }
-            return $"{clientId}|{eventName}|";
+            return $"{eventName}|{clientId}|";
         }
 
         public static string[] Deserialize(string message)
@@ -59,13 +59,13 @@ namespace LKZ.Network.Common.Events
             var parts = message.Split('|');
             if (parts.Length > 0)
             {
-                var clientId = parts[0]; // Get the client ID
-                var command = parts[1]; // Get the event name
+                var eventName = parts[0]; // Get the event name
+                var clientId = parts[1]; // Get the client ID
                 var parameters = parts.Length > 2 ? parts[2].Split(',') : new string[] { };
 
                 var result = new string[1 + parameters.Length + 1];
-                result[0] = clientId; // Store client ID
-                result[1] = command; // Store event name
+                result[0] = eventName; // Store event name
+                result[1] = clientId; // Store client ID
                 for (int i = 0; i < parameters.Length; i++)
                 {
                     result[i + 2] = parameters[i]; // Store parameters

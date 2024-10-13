@@ -1,6 +1,9 @@
 ﻿using LKZ;
 using LKZ.Network.Common.Events;
+using LKZ.Server.Handlers.Chat;
 using LKZ.Server.Network;
+using System;
+using System.Threading;
 
 namespace LKZ.Network.Server
 {
@@ -11,18 +14,12 @@ namespace LKZ.Network.Server
             Thread serverThread = new Thread(() => BaseServer.Start("127.0.0.1", 5000));
             serverThread.Start();
 
+            EventManager.RegisterEvent("SendChatMessage", ChatHandler.HandleChatMessageMessage);
 
-            //EventManager.RegisterEvent("ClientCreatedMessage", Handlers.Approach.ApproachHandler.HandleClientCreatedMessage);
-            // Give the server a moment to start
             Thread.Sleep(1000);
-
-            //LKZ.Network.Server.TCP.Network.
-
-            //  LKZ.Network.Server.TCP.Network.TriggerClientEvent(LKZ.Network.Server.TCP.Network.GetClient(), "helo", t)
-           
-
             Console.ReadLine();
 
+            BaseServer.Stop();
         }
     }
 }
