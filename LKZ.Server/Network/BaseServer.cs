@@ -156,7 +156,25 @@ namespace LKZ.Server.Network
 
             byte[] data = Encoding.ASCII.GetBytes(fullMessage);
             tcpClient.GetStream().Write(data, 0, data.Length);
-           //Thread.Sleep(TimeBetweenMessage);
+            Console.WriteLine($"Message sent ({clientId}): {eventName} ({paramStr})");
+            //Thread.Sleep(TimeBetweenMessage);
+        }
+        public static void TriggerClientsWithoutSenderEvent(int clientId, string eventName, params object[] parameters)
+        {
+            string paramStr = string.Join(",", parameters);
+            string fullMessage = $"{eventName}|{clientId}|{paramStr}"; // Change the order
+
+            byte[] data = Encoding.ASCII.GetBytes(fullMessage);
+            var clientss = clients.Where(x => x.Key != clientId);
+            foreach (var client in clientss)
+            {
+                client.Value.GetStream().Write(data, 0, data.Length);
+                Console.WriteLine($"Message sent ({client.Key}): {eventName} ({paramStr})");
+                foreach(var ko in clientss)
+                {
+                    Console.WriteLine("cliient" + ko.Key);
+                }
+            }
         }
 
         public static void TriggerClientsEvent(int clientId, string eventName, params object[] parameters)
