@@ -11,11 +11,17 @@ using System.Threading.Tasks;
 
 namespace LKZ.Server.Network
 {
+
+    // parameters[0] = event name
+    // parameters[1] = client id
+    // other = parameters
     public static class BaseServer
     {
+        public const int MAX_BUFFER_SIZE = 1024;
+
         private static TcpListener _server;
         private static bool _isRunning;
-        private static Dictionary<int, TcpClient> clients = new Dictionary<int, TcpClient>();
+        private static Dictionary<uint, TcpClient> clients = new Dictionary<uint, TcpClient>();
 
         // Event delegates
         public delegate void ClientConnectedEventHandler(object sender, TcpClient client);
@@ -75,7 +81,7 @@ namespace LKZ.Server.Network
         {
             using (NetworkStream stream = client.GetStream())
             {
-                byte[] buffer = new byte[1024];
+                byte[] buffer = new byte[MAX_BUFFER_SIZE];
 
                 while (client.Connected)
                 {
@@ -85,12 +91,21 @@ namespace LKZ.Server.Network
                         break; // if there is no data
 
                     string message = Encoding.ASCII.GetString(buffer, 0, bytesRead);
+
+  
+                    if (message.Length > MAX_BUFFER_SIZE) 
+                    {
+                        Console.WriteLine($"Error: Received message is too large ({message.Length} characters).");
+                        continue; // Ignore ce message et passe au suivant
+                    }
+
                     OnDataReceived?.Invoke(null, message, client);
                 }
             }
 
             OnClientDisconnected?.Invoke(null, client);
         }
+
 
         public static void HandleClientConnected(object sender, TcpClient client)
         {
@@ -104,18 +119,25 @@ namespace LKZ.Server.Network
 
         private static void HandleDataReceived(object sender, string message, TcpClient client)
         {
-            var parts = message.Split('|');
 
-            if (parts[0] == "ClientCreatedMessage")
+            string[] messages = message.Split('µ', StringSplitOptions.RemoveEmptyEntries);
+
+            foreach (var msg in messages)
             {
-                AddClient(Int32.Parse(parts[1]), client);
-            }
+                var parts = msg.Split('|');
 
-            EventManager.TriggerRaw(message);
-            Console.WriteLine($"Message received ({parts[1]}): {parts[0]} ({parts[2]})");
+                if (parts[0] == "ClientCreatedMessage")
+                {
+                    AddClient(UInt32.Parse(parts[1]), client);
+                }
+
+                EventManager.TriggerRaw(msg);
+                Console.WriteLine($"Message received ({parts[1]}): {parts[0]} ({parts[2]})");
+            }
         }
 
-        public static void AddClient(int id, TcpClient client)
+
+        public static void AddClient(uint id, TcpClient client)
         {
             try
             {
@@ -135,7 +157,7 @@ namespace LKZ.Server.Network
             }
         }
 
-        public static TcpClient GetTcpClient(int id)
+        public static TcpClient GetTcpClient(uint id)
         {
             if (clients.TryGetValue(id, out TcpClient client))
             {
@@ -150,43 +172,46 @@ namespace LKZ.Server.Network
 
         public static void TriggerClientEvent(int clientId, string eventName, params object[] parameters)
         {
-            TcpClient tcpClient = GetTcpClient(clientId);
+            // Convertir les paramètres en chaîne de caractères
             string paramStr = string.Join(",", parameters);
             string fullMessage = $"{eventName}|{clientId}|{paramStr}"; // Change the order
-
             byte[] data = Encoding.ASCII.GetBytes(fullMessage);
-            tcpClient.GetStream().Write(data, 0, data.Length);
-            Console.WriteLine($"Message sent ({clientId}): {eventName} ({paramStr})");
-            //Thread.Sleep(TimeBetweenMessage);
-        }
-        public static void TriggerClientsWithoutSenderEvent(int clientId, string eventName, params object[] parameters)
-        {
-            string paramStr = string.Join(",", parameters);
-            string fullMessage = $"{eventName}|{clientId}|{paramStr}"; // Change the order
 
-            byte[] data = Encoding.ASCII.GetBytes(fullMessage);
-            var clientss = clients.Where(x => x.Key != clientId);
-            foreach (var client in clientss)
+            // Cas où l'on envoie à tous les clients (clientId == -1)
+            if (clientId == -1)
             {
-                client.Value.GetStream().Write(data, 0, data.Length);
-                Console.WriteLine($"Message sent ({client.Key}): {eventName} ({paramStr})");
-                foreach(var ko in clientss)
+                foreach (var client in clients)
                 {
-                    Console.WriteLine("cliient" + ko.Key);
+                    client.Value.GetStream().Write(data, 0, data.Length);
+                    Console.WriteLine($"Message sent to Client ({client.Key}): {eventName} ({paramStr})");
                 }
             }
-        }
-
-        public static void TriggerClientsEvent(int clientId, string eventName, params object[] parameters)
-        {
-            string paramStr = string.Join(",", parameters);
-            string fullMessage = $"{eventName}|{clientId}|{paramStr}"; // Change the order
-
-            byte[] data = Encoding.ASCII.GetBytes(fullMessage);
-
-            foreach (var client in clients)
+            // Cas où l'on envoie à tous les clients sauf un (clientId == -2)
+            else if (clientId == -2 && parameters.Length > 0 && parameters[0] is int excludeClientId)
             {
-                client.Value.GetStream().Write(data, 0, data.Length);
+                foreach (var client in clients)
+                {
+                    if (client.Key != excludeClientId) // Ne pas envoyer au client spécifié en premier paramètre
+                    {
+                        client.Value.GetStream().Write(data, 0, data.Length);
+                        Console.WriteLine($"Message sent to Client ({client.Key}): {eventName} ({paramStr})");
+                    }
+                }
+            }
+            // Cas où l'on envoie à un client spécifique (clientId > 0)
+            else if (clientId > 0)
+            {
+                TcpClient tcpClient = GetTcpClient((uint)clientId);
+
+                if (tcpClient != null)
+                {
+                    tcpClient.GetStream().Write(data, 0, data.Length);
+                    Console.WriteLine($"Message sent to Client ({clientId}): {eventName} ({paramStr})");
+                }
+                else
+                {
+                    Console.WriteLine($"Client {clientId} not found.");
+                }
             }
         }
 

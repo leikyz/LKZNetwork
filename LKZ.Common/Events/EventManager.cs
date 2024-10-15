@@ -4,6 +4,8 @@ using System.Linq;
 
 namespace LKZ.Network.Common.Events
 {
+
+    // crédit : Leikyz
     public static class EventManager
     {
         private static Dictionary<string, List<Action<string[]>>> events = new Dictionary<string, List<Action<string[]>>>();
