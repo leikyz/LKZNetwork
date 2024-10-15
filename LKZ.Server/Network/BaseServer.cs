@@ -54,6 +54,7 @@ namespace LKZ.Server.Network
         private static void RegisterEvents()
         {
             EventManager.RegisterEvent("PlayerCreatedMessage", PlayerHandler.HandlePlayerCreatedMessage);
+            EventManager.RegisterEvent("PlayerMovedMessage", PlayerHandler.HandlePlayerMovedMessage);
             EventManager.RegisterEvent("SendPrivateChatMessage", ChatHandler.HandleChatMessageMessage);
         }
 
