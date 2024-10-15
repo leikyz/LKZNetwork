@@ -38,8 +38,9 @@ namespace LKZ.Server.Network
             _server = new TcpListener(IPAddress.Parse(ipAddress), port);
             _server.Start();
             _isRunning = true;
-            Console.WriteLine("Server started, waiting for clients...");
-
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine($"({ipAddress} {port}) Server started, waiting for clients...");
+            Console.ResetColor();
             OnClientConnected += HandleClientConnected;
             OnClientDisconnected += HandleClientDisconnected;
             OnDataReceived += HandleDataReceived;
@@ -109,12 +110,14 @@ namespace LKZ.Server.Network
 
         public static void HandleClientConnected(object sender, TcpClient client)
         {
-            Console.WriteLine($"TCPClient {client.Client.RemoteEndPoint} connected.");
+           
         }
 
         public static void HandleClientDisconnected(object sender, TcpClient client)
         {
+            Console.ForegroundColor = ConsoleColor.Red;
             Console.WriteLine("A client has disconnected.");
+            Console.ResetColor();
         }
 
         private static void HandleDataReceived(object sender, string message, TcpClient client)
@@ -132,7 +135,9 @@ namespace LKZ.Server.Network
                 }
 
                 EventManager.TriggerRaw(msg);
-                Console.WriteLine($"Message received ({parts[1]}): {parts[0]} ({parts[2]})");
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                Console.WriteLine($"({parts[1]}) Message received : {parts[0]} ({parts[2]})");
+                Console.ResetColor();
             }
         }
 
@@ -141,15 +146,19 @@ namespace LKZ.Server.Network
         {
             try
             {
+                Console.ForegroundColor = ConsoleColor.Green;
                 if (!clients.ContainsKey(id))
                 {
                     clients.Add(id, client);
-                    Console.WriteLine($"Client with ID {id} added successfully.");
+                   
+                    Console.WriteLine($"({client.Client.RemoteEndPoint}) Client with ID {id} connected successfully.");
                 }
                 else
                 {
                     Console.WriteLine($"Client with ID {id} already exists.");
                 }
+
+                Console.ResetColor();
             }
             catch (Exception ex)
             {
@@ -169,7 +178,12 @@ namespace LKZ.Server.Network
                 return null;
             }
         }
-
+        /// <summary>
+        /// Triggers an event for the client:
+        /// clientId > 0 = sends the event to the specified client.
+        /// clientId = -2 = sends the event to all clients except the client in the first parameter.
+        ///clientId = -1 = sends the event to all clients.
+        /// </summary>
         public static void TriggerClientEvent(int clientId, string eventName, params object[] parameters)
         {
             // Convertir les paramètres en chaîne de caractères
@@ -183,7 +197,6 @@ namespace LKZ.Server.Network
                 foreach (var client in clients)
                 {
                     client.Value.GetStream().Write(data, 0, data.Length);
-                    Console.WriteLine($"Message sent to Client ({client.Key}): {eventName} ({paramStr})");
                 }
             }
             // Cas où l'on envoie à tous les clients sauf un (clientId == -2)
@@ -194,7 +207,6 @@ namespace LKZ.Server.Network
                     if (client.Key != excludeClientId) // Ne pas envoyer au client spécifié en premier paramètre
                     {
                         client.Value.GetStream().Write(data, 0, data.Length);
-                        Console.WriteLine($"Message sent to Client ({client.Key}): {eventName} ({paramStr})");
                     }
                 }
             }
@@ -206,13 +218,16 @@ namespace LKZ.Server.Network
                 if (tcpClient != null)
                 {
                     tcpClient.GetStream().Write(data, 0, data.Length);
-                    Console.WriteLine($"Message sent to Client ({clientId}): {eventName} ({paramStr})");
+                
                 }
                 else
                 {
                     Console.WriteLine($"Client {clientId} not found.");
                 }
             }
+            Console.ForegroundColor = ConsoleColor.Cyan;
+            Console.WriteLine($"({clientId}) Message sent : {eventName} ({paramStr})");
+            Console.ResetColor();
         }
 
         public static void ListClients()

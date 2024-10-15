@@ -10,8 +10,9 @@ namespace LKZ.Server.Handlers.Players
             int sendId = Int32.Parse(parameters[1]);
 
             LobbyManager.AddPlayer(sendId);
-            BaseServer.TriggerClientEvent(-2, "PlayerCreatedMessage", sendId, LobbyManager.GetPlayerPosition(sendId), 0);
-            BaseServer.TriggerClientEvent(sendId, "PlayerCreatedMessage", LobbyManager.GetPlayerPosition(sendId), 1);
+
+            BaseServer.TriggerClientEvent(sendId, "PlayerCreatedMessage",LobbyManager.GetPlayerPosition(sendId));
+            BaseServer.TriggerClientEvent(-2, "PlayerJoinedMessage", sendId, LobbyManager.GetPlayerPosition(sendId));
         }
     }
 }

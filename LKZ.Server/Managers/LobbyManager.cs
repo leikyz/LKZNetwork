@@ -11,11 +11,9 @@ namespace LKZ.Server.Managers
             if (!connectedPlayers.Contains(playerId))
             {
                 connectedPlayers.Add(playerId);
-                Console.WriteLine($"Player {playerId} added.");
             }
             else
             {
-                Console.WriteLine($"Player {playerId} is already connected.");
             }
         }
 
@@ -24,7 +22,6 @@ namespace LKZ.Server.Managers
             if (connectedPlayers.Contains(playerId))
             {
                 connectedPlayers.Remove(playerId);
-                Console.WriteLine($"Player {playerId} removed.");
             }
             else
             {
@@ -36,12 +33,10 @@ namespace LKZ.Server.Managers
             int index = connectedPlayers.IndexOf(playerId);
             if (index >= 0)
             {
-                Console.WriteLine($"Player {playerId} is at position {index}.");
                 return index; // Retourne l'index du joueur
             }
             else
             {
-                Console.WriteLine($"Player {playerId} not found in the list.");
                 return -1; // Retourne -1 si le joueur n'est pas trouvé
             }
         }
