@@ -51,9 +51,9 @@ namespace LKZ.Network.Common.Events
             if (parameters != null && parameters.Length > 0)
             {
                 string paramStr = string.Join(",", parameters);
-                return $"{eventName}|{clientId}|{paramStr}";
+                return $"{eventName}|{clientId}|{paramStr}-";
             }
-            return $"{eventName}|{clientId}|";
+            return $"{eventName}|{clientId}|-";
         }
 
         public static string[] Deserialize(string message)

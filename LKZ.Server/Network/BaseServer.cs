@@ -124,7 +124,7 @@ namespace LKZ.Server.Network
         private static void HandleDataReceived(object sender, string message, TcpClient client)
         {
 
-            string[] messages = message.Split('µ', StringSplitOptions.RemoveEmptyEntries);
+            string[] messages = message.Split('-', StringSplitOptions.RemoveEmptyEntries);
 
             foreach (var msg in messages)
             {
@@ -187,9 +187,7 @@ namespace LKZ.Server.Network
         /// </summary>
         public static void TriggerClientEvent(int clientId, string eventName, params object[] parameters)
         {
-            // Convertir les paramètres en chaîne de caractères
-            string paramStr = string.Join(",", parameters);
-            string fullMessage = $"{eventName}|{clientId}|{paramStr}"; // Change the order
+            string fullMessage = EventManager.Serialize(eventName, clientId.ToString(), parameters);
             byte[] data = Encoding.ASCII.GetBytes(fullMessage);
 
             // Cas où l'on envoie à tous les clients (clientId == -1)
@@ -227,7 +225,7 @@ namespace LKZ.Server.Network
                 }
             }
             Console.ForegroundColor = ConsoleColor.Cyan;
-            Console.WriteLine($"({clientId}) Message sent : {eventName} ({paramStr})");
+            Console.WriteLine($"({clientId}) Message sent : {eventName} ({parameters.ToString()})");
             Console.ResetColor();
         }
 
