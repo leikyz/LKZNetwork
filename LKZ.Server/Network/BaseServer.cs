@@ -1,4 +1,5 @@
 ﻿using LKZ.Network.Common.Events;
+using LKZ.Network.Server.Handlers.Approach;
 using LKZ.Server.Handlers.Chat;
 using LKZ.Server.Handlers.Players;
 using System;
@@ -53,6 +54,8 @@ namespace LKZ.Server.Network
 
         private static void RegisterEvents()
         {
+            EventManager.RegisterEvent("LobbyCreatedMessage", ApproachHandler.HandleLobbyCreatedMessage);
+
             EventManager.RegisterEvent("PlayerCreatedMessage", PlayerHandler.HandlePlayerCreatedMessage);
             EventManager.RegisterEvent("PlayerMoveMessage", PlayerHandler.HandlePlayerMoveMessage);
             EventManager.RegisterEvent("SendPrivateChatMessage", ChatHandler.HandleChatMessageMessage);
@@ -220,7 +223,7 @@ namespace LKZ.Server.Network
                 if (tcpClient != null)
                 {
                     tcpClient.GetStream().Write(data, 0, data.Length);
-                
+
                 }
                 else
                 {

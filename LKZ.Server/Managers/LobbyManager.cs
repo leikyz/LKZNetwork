@@ -1,53 +1,126 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace LKZ.Server.Managers
 {
-    static public class LobbyManager
+    public class Lobby
     {
-        private static List<int> connectedPlayers = new List<int>();
+        public int LobbyId { get; private set; }
+        private List<int> clients;
 
-        public static void AddPlayer(int playerId)
+        public Lobby(int id)
         {
-            if (!connectedPlayers.Contains(playerId))
+            LobbyId = id;
+            clients = new List<int>();
+        }
+
+        public void AddClient(int playerId)
+        {
+            if (!clients.Contains(playerId))
             {
-                connectedPlayers.Add(playerId);
+                clients.Add(playerId);
+                PlayerManager.AddPlayer(playerId, LobbyId); // Associer le joueur à ce lobby
+            }
+        }
+
+        public void RemovePlayer(int playerId)
+        {
+            if (clients.Contains(playerId))
+            {
+                clients.Remove(playerId);
+                PlayerManager.RemovePlayer(playerId); // Supprimer aussi le joueur du PlayerManager
             }
             else
             {
+                Console.WriteLine($"Player {playerId} not found in lobby {LobbyId}.");
             }
         }
 
-        public static void RemovePlayer(int playerId)
+        public List<int> GetPlayers()
         {
-            if (connectedPlayers.Contains(playerId))
-            {
-                connectedPlayers.Remove(playerId);
-            }
-            else
-            {
-                Console.WriteLine($"Player {playerId} not found.");
-            }
-        }
-        public static int GetPlayerPosition(int playerId)
-        {
-            int index = connectedPlayers.IndexOf(playerId);
-            if (index >= 0)
-            {
-                return index; // Retourne l'index du joueur
-            }
-            else
-            {
-                return -1; // Retourne -1 si le joueur n'est pas trouvé
-            }
-        }
-        public static List<int> GetConnectedPlayers()
-        {
-            return new List<int>(connectedPlayers); 
+            return new List<int>(clients);
         }
 
-        public static bool IsPlayerConnected(int playerId)
+        public bool IsPlayerInLobby(int playerId)
         {
-            return connectedPlayers.Contains(playerId);
+            return clients.Contains(playerId);
+        }
+    }
+
+    public static class LobbyManager
+    {
+        private static List<Lobby> lobbies = new List<Lobby>();
+        private static int nextLobbyId = 5; // ID de lobby incrémenté automatiquement
+
+        // Création d'un nouveau lobby avec un ID unique
+        public static Lobby CreateLobby()
+        {
+            int newLobbyId = nextLobbyId++; // Incrémentation automatique de l'ID
+            Lobby newLobby = new Lobby(newLobbyId);
+            lobbies.Add(newLobby);
+            Console.WriteLine($"Lobby {newLobbyId} created.");
+            return newLobby;
+        }
+
+        // Supprimer un lobby
+        public static void RemoveLobby(int lobbyId)
+        {
+            Lobby lobbyToRemove = GetLobby(lobbyId);
+            if (lobbyToRemove != null)
+            {
+                lobbies.Remove(lobbyToRemove);
+                Console.WriteLine($"Lobby {lobbyId} removed.");
+            }
+            else
+            {
+                Console.WriteLine($"Lobby {lobbyId} not found.");
+            }
+        }
+
+        // Récupérer un lobby par son ID
+        public static Lobby GetLobby(int lobbyId)
+        {
+            return lobbies.Find(lobby => lobby.LobbyId == lobbyId);
+        }
+
+        // Vérifier si un lobby existe
+        public static bool IsLobbyExists(int lobbyId)
+        {
+            return lobbies.Exists(lobby => lobby.LobbyId == lobbyId);
+        }
+
+        // Obtenir tous les lobbies
+        public static List<Lobby> GetAllLobbies()
+        {
+            return new List<Lobby>(lobbies);
+        }
+
+        // Ajouter un joueur à un lobby spécifique
+        public static void AddPlayerToLobby(int playerId, int lobbyId)
+        {
+            Lobby lobby = GetLobby(lobbyId);
+            if (lobby != null)
+            {
+                lobby.AddClient(playerId);
+            }
+            else
+            {
+                Console.WriteLine($"Lobby {lobbyId} not found.");
+            }
+        }
+
+        // Retirer un joueur d'un lobby spécifique
+        public static void RemovePlayerFromLobby(int playerId, int lobbyId)
+        {
+            Lobby lobby = GetLobby(lobbyId);
+            if (lobby != null)
+            {
+                lobby.RemovePlayer(playerId);
+            }
+            else
+            {
+                Console.WriteLine($"Lobby {lobbyId} not found.");
+            }
         }
     }
 }

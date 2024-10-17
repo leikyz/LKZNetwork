@@ -1,18 +1,28 @@
-﻿using System;
+﻿using LKZ.Network.Common.Events;
+using LKZ.Server.Managers; // Assurer d'inclure le namespace du LobbyManager et PlayerManager
+using LKZ.Server.Network;
+using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 namespace LKZ.Network.Server.Handlers.Approach
 {
     static public class ApproachHandler
     {
-        static public void HandleClientCreatedMessage(string[] parameters)
+        static public void HandleLobbyCreatedMessage(string[] parameters)
         {
-            // Console.WriteLine(parameters[0] + " im the client, !");
-        }
+            // On s'assure que les paramètres contiennent l'information nécessaire
+            //if (parameters.Length < 2)
+            //{
+            //    Console.WriteLine("Invalid parameters for LobbyCreatedMessage.");
+            //    return;
+            //}
 
+            var lobby = LobbyManager.CreateLobby();
+            lobby.AddClient(int.Parse(parameters[0]));
+
+            Console.WriteLine($"Lobby '{lobby.LobbyId}' created.");
+
+            BaseServer.TriggerClientEvent(-1, "LobbyCreatedMessage", lobby.LobbyId);
+        }
     }
 }
