@@ -54,8 +54,9 @@ namespace LKZ.Server.Network
         private static void RegisterEvents()
         {
             EventManager.RegisterEvent("PlayerCreatedMessage", PlayerHandler.HandlePlayerCreatedMessage);
-            EventManager.RegisterEvent("PlayerMovedMessage", PlayerHandler.HandlePlayerMovedMessage);
+            EventManager.RegisterEvent("PlayerMoveMessage", PlayerHandler.HandlePlayerMoveMessage);
             EventManager.RegisterEvent("SendPrivateChatMessage", ChatHandler.HandleChatMessageMessage);
+            EventManager.RegisterEvent("PlayerRotationMessage", PlayerHandler.HandlePlayerRotationMessage);
         }
 
         private static async Task AcceptClients()
@@ -226,9 +227,9 @@ namespace LKZ.Server.Network
                     Console.WriteLine($"Client {clientId} not found.");
                 }
             }
-            Console.ForegroundColor = ConsoleColor.Cyan;
-            Console.WriteLine($"({clientId}) Message sent : {eventName} ({parameters.ToString()})");
-            Console.ResetColor();
+            //Console.ForegroundColor = ConsoleColor.Cyan;
+            //Console.WriteLine($"({clientId}) Message sent : {eventName} ({parameters.ToString()})");
+            //Console.ResetColor();
         }
 
         public static void ListClients()

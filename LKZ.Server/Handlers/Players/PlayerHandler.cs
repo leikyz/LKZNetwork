@@ -7,6 +7,9 @@ namespace LKZ.Server.Handlers.Players
     {
         static public void HandlePlayerCreatedMessage(string[] parameters)
         {
+            if (!EventManager.ValidateParameters(parameters, 1))
+                return;
+
             int sendId = Int32.Parse(parameters[0]);
 
             LobbyManager.AddPlayer(sendId);
@@ -15,14 +18,24 @@ namespace LKZ.Server.Handlers.Players
             BaseServer.TriggerClientEvent(-2, "PlayerJoinedMessage", sendId, LobbyManager.GetPlayerPosition(sendId));
         }
 
-        static public void HandlePlayerMovedMessage(string[] parameters)
+        static public void HandlePlayerMoveMessage(string[] parameters)
         {
-            //if (!EventManager.ValidateParameters(parameters, 4))
-            //    return;
+            if (!EventManager.ValidateParameters(parameters, 5))
+                return;
 
             int sendId = Int32.Parse(parameters[0]);
 
-            BaseServer.TriggerClientEvent(-2, "PlayerMovedMessage", sendId, parameters[1], parameters[2], parameters[3], parameters[4]);
+            BaseServer.TriggerClientEvent(-2, "PlayerMoveMessage", sendId, parameters[1], parameters[2], parameters[3], parameters[4]);
+        }
+
+        static public void HandlePlayerRotationMessage(string[] parameters)
+        {
+            if (!EventManager.ValidateParameters(parameters, 3))
+                return;
+
+            int sendId = Int32.Parse(parameters[0]);
+
+            BaseServer.TriggerClientEvent(-2, "PlayerRotationMessage", sendId, parameters[1], parameters[2]);
         }
     }
 }
