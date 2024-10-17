@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 
 namespace LKZ.Network.Common.Events
@@ -22,21 +23,24 @@ namespace LKZ.Network.Common.Events
         public static void TriggerRaw(string message)
         {
             string[] content = Deserialize(message);
+
+            // Vérification pour éviter des appels d'événements invalides
             if (content.Length < 2)
             {
-                Console.WriteLine("Invalid event call");
+                Console.WriteLine("Invalid event call"); // Utilisation de Debug.Log au lieu de Console.WriteLine
                 return;
             }
 
-            string eventName = content[0]; // Get the event name
-            string clientId = content[1]; // Get the client ID
+            // Récupérer le nom de l'événement et les arguments
+            string eventName = content[0];
+            string[] args = content.Skip(1).ToArray();
 
+            // Appeler toutes les fonctions enregistrées pour cet événement
             if (events.ContainsKey(eventName))
             {
-                //string[] args = content.Skip(1).ToArray(); // Skip the first two elements (event name and client ID)
                 foreach (var function in events[eventName])
                 {
-                    function.Invoke(content);
+                    function.Invoke(args);
                 }
             }
         }
@@ -56,6 +60,12 @@ namespace LKZ.Network.Common.Events
             return $"{eventName}|{clientId}|-";
         }
 
+        public static bool ValidateParameters(string[] parameters, int expectedCount)
+        {
+            return parameters.Length == expectedCount;
+        }
+
+
         public static string[] Deserialize(string message)
         {
             var parts = message.Split('|');
@@ -63,9 +73,11 @@ namespace LKZ.Network.Common.Events
             {
                 var eventName = parts[0]; // Get the event name
                 var clientId = parts[1]; // Get the client ID
-                var parameters = parts.Length > 2 ? parts[2].Split(',') : new string[] { };
+                var parameters = (parts.Length > 2 && !string.IsNullOrWhiteSpace(parts[2]))
+                                  ? parts[2].Split(',')
+                                  : new string[] { }; // Handle empty parameters
 
-                var result = new string[1 + parameters.Length + 1];
+                var result = new string[2 + parameters.Length];
                 result[0] = eventName; // Store event name
                 result[1] = clientId; // Store client ID
                 for (int i = 0; i < parameters.Length; i++)
@@ -77,5 +89,6 @@ namespace LKZ.Network.Common.Events
 
             return new string[] { };
         }
+
     }
 }
