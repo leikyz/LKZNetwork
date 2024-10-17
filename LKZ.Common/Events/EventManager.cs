@@ -54,10 +54,10 @@ namespace LKZ.Network.Common.Events
         {
             if (parameters != null && parameters.Length > 0)
             {
-                string paramStr = string.Join(",", parameters);
-                return $"{eventName}|{clientId}|{paramStr}-";
+                string paramStr = string.Join("&", parameters);
+                return $"{eventName}|{clientId}|{paramStr}~";
             }
-            return $"{eventName}|{clientId}|-";
+            return $"{eventName}|{clientId}|~";
         }
 
         public static bool ValidateParameters(string[] parameters, int expectedCount)
@@ -69,12 +69,12 @@ namespace LKZ.Network.Common.Events
         public static string[] Deserialize(string message)
         {
             var parts = message.Split('|');
-            if (parts.Length > 0)
+            if (parts.Length > 1)
             {
                 var eventName = parts[0]; // Get the event name
                 var clientId = parts[1]; // Get the client ID
                 var parameters = (parts.Length > 2 && !string.IsNullOrWhiteSpace(parts[2]))
-                                  ? parts[2].Split(',')
+                                  ? parts[2].Split('&')
                                   : new string[] { }; // Handle empty parameters
 
                 var result = new string[2 + parameters.Length];

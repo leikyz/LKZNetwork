@@ -124,11 +124,13 @@ namespace LKZ.Server.Network
         private static void HandleDataReceived(object sender, string message, TcpClient client)
         {
 
-            string[] messages = message.Split('-', StringSplitOptions.RemoveEmptyEntries);
+            string[] messages = message.Split('~', StringSplitOptions.RemoveEmptyEntries);
 
             foreach (var msg in messages)
             {
                 var parts = msg.Split('|');
+
+
 
                 if (parts[0] == "ClientCreatedMessage")
                 {

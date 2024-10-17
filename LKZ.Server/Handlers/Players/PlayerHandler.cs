@@ -17,8 +17,8 @@ namespace LKZ.Server.Handlers.Players
 
         static public void HandlePlayerMovedMessage(string[] parameters)
         {
-            if (!EventManager.ValidateParameters(parameters, 5))
-                return;
+            //if (!EventManager.ValidateParameters(parameters, 4))
+            //    return;
 
             int sendId = Int32.Parse(parameters[0]);
 
