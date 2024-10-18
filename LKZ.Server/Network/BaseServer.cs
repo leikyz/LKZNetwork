@@ -23,7 +23,7 @@ namespace LKZ.Server.Network
         private static TcpListener _server;
         private static bool _isRunning;
         private static Dictionary<uint, TcpClient> clients = new Dictionary<uint, TcpClient>();
-
+        public static uint NextClientId = 1;
         // Event delegates
         public delegate void ClientConnectedEventHandler(object sender, TcpClient client);
         public delegate void ClientDisconnectedEventHandler(object sender, TcpClient client);
@@ -55,6 +55,7 @@ namespace LKZ.Server.Network
         private static void RegisterEvents()
         {
             EventManager.RegisterEvent("LobbyCreatedMessage", ApproachHandler.HandleLobbyCreatedMessage);
+            EventManager.RegisterEvent("LobbyListMessage", ApproachHandler.HandleLobbyListMessage);
 
             EventManager.RegisterEvent("PlayerCreatedMessage", PlayerHandler.HandlePlayerCreatedMessage);
             EventManager.RegisterEvent("PlayerMoveMessage", PlayerHandler.HandlePlayerMoveMessage);
@@ -134,16 +135,15 @@ namespace LKZ.Server.Network
             {
                 var parts = msg.Split('|');
 
-
-
                 if (parts[0] == "ClientCreatedMessage")
                 {
-                    AddClient(UInt32.Parse(parts[1]), client);
+                    AddClient(BaseServer.NextClientId, client);
+                    BaseServer.NextClientId++;
                 }
 
                 EventManager.TriggerRaw(msg);
                 Console.ForegroundColor = ConsoleColor.Yellow;
-                Console.WriteLine($"({parts[1]}) Message received : {parts[0]} ({parts[2]})");
+                Console.WriteLine($"({client.Client.RemoteEndPoint}) Message received : {parts[0]} ({parts[1]})");
                 Console.ResetColor();
             }
         }
@@ -230,9 +230,9 @@ namespace LKZ.Server.Network
                     Console.WriteLine($"Client {clientId} not found.");
                 }
             }
-            //Console.ForegroundColor = ConsoleColor.Cyan;
-            //Console.WriteLine($"({clientId}) Message sent : {eventName} ({parameters.ToString()})");
-            //Console.ResetColor();
+            Console.ForegroundColor = ConsoleColor.Cyan;
+            Console.WriteLine($"({clientId}) Message sent : {eventName} ({parameters.ToString()})");
+            Console.ResetColor();
         }
 
         public static void ListClients()

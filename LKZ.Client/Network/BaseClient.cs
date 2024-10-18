@@ -33,8 +33,6 @@ namespace LKZ.Network.Client.Network
             stream = client.GetStream();
             Console.WriteLine("Connected to the server.");
 
-            TriggerServerEvent(id, "ClientCreatedMessage");
-
             Task.Run(() => ReceiveMessages());
         }
 

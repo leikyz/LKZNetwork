@@ -7,15 +7,15 @@ namespace LKZ.Server.Handlers.Players
     {
         static public void HandlePlayerCreatedMessage(string[] parameters)
         {
-        //    if (!EventManager.ValidateParameters(parameters, 1))
-        //        return;
+            //if (!EventManager.ValidateParameters(parameters, 1))
+            //    return;
 
-        //    int sendId = Int32.Parse(parameters[0]);
+            //int sendId = Int32.Parse(parameters[0]);
 
-        //    LobbyManager.AddPlayer(sendId);
+            //LobbyManager.AddPlayerToLobby(sendId);
 
-        //    BaseServer.TriggerClientEvent(sendId, "PlayerCreatedMessage", LobbyManager.GetPlayerPosition(sendId));
-        //    BaseServer.TriggerClientEvent(-2, "PlayerJoinedMessage", sendId, LobbyManager.GetPlayerPosition(sendId));
+            //BaseServer.TriggerClientEvent(sendId, "PlayerCreatedMessage", LobbyManager.GetPlayerPosition(sendId));
+            //BaseServer.TriggerClientEvent(-2, "PlayerJoinedMessage", sendId, LobbyManager.GetPlayerPosition(sendId));
         }
 
         static public void HandlePlayerMoveMessage(string[] parameters)
