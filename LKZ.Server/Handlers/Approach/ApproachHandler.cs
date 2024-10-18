@@ -8,28 +8,30 @@ namespace LKZ.Network.Server.Handlers.Approach
 {
     static public class ApproachHandler
     {
-        static public void HandleLobbyCreatedMessage(string[] parameters)
+        static public void HandleLobbyCreatedMessage(BaseClient client, string[] parameters)
         {
             var lobby = LobbyManager.CreateLobby();
-            lobby.AddClient(int.Parse(parameters[0]));
+            lobby.AddClient(client);
+            client.Lobby = lobby;
 
             Console.WriteLine($"Lobby '{lobby.LobbyId}' created.");
 
-            BaseServer.TriggerClientEvent(-1, "LobbyCreatedMessage", lobby.LobbyId);
+            BaseServer.TriggerClientEvent(-1, "LobbyCreatedMessage", lobby.LobbyId, lobby.LobbyId);
+           
         }
 
-        static public void HandleLobbyListMessage(string[] parameters)
+        static public void HandleLobbyListMessage(BaseClient client, string[] parameters)
         {
-            List<Lobby> allLobbies = LobbyManager.GetAllLobbies();
+            //List<Lobby> allLobbies = LobbyManager.GetAllLobbies();
 
-            List<string> lobbyInfoList = new List<string>();
-            foreach (var lobby in allLobbies)
-            {
-                lobbyInfoList.Add($"{lobby.LobbyId}^{lobby.GetPlayers().Count}");
-            }
-            string lobbiesString = string.Join("$", lobbyInfoList);
+            //List<string> lobbyInfoList = new List<string>();
+            //foreach (var lobby in allLobbies)
+            //{
+            //    lobbyInfoList.Add($"{lobby.LobbyId}^{lobby.ClientsCount}");
+            //}
+            //string lobbiesString = string.Join("$", lobbyInfoList);
 
-            BaseServer.TriggerClientEvent(int.Parse(parameters[0]), "LobbyListMessage", lobbiesString);
+            //BaseServer.TriggerClientEvent(int.Parse(parameters[0]), "LobbyListMessage", lobbiesString);
 
         }
 

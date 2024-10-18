@@ -1,3 +1,4 @@
+using LKZ.Server.Managers;
 using System.Net.Sockets;
 
 public class BaseClient
@@ -6,6 +7,8 @@ public class BaseClient
     public TcpClient TcpClient { get; set; }
 
     public uint PlayerId { get; set; }
+
+    public Lobby Lobby { get; set; }
 
     public BaseClient(uint id, TcpClient tcpClient)
     {

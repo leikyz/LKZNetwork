@@ -7,8 +7,4 @@
     <OutputType>Exe</OutputType>
   </PropertyGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\LKZ.Common\LKZ.Common.csproj" />
-  </ItemGroup>
-
 </Project>

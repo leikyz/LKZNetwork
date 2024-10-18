@@ -1,7 +1,7 @@
 ﻿using LKZ.Network.Common.Events;
 using LKZ.Network.Server.Handlers.Approach;
-using LKZ.Server.Handlers.Chat;
-using LKZ.Server.Handlers.Players;
+using LKZ.Server.Handlers.Entity;
+using LKZ.Server.Managers;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -25,6 +25,7 @@ namespace LKZ.Server.Network
         private static bool _isRunning;
         private static List<BaseClient> clients = new List<BaseClient>();
         public static uint NextClientId = 1;
+        public static uint NextEntityId = 1;
         // Event delegates
         public delegate void ClientConnectedEventHandler(object sender, TcpClient client);
         public delegate void ClientDisconnectedEventHandler(object sender, TcpClient client);
@@ -57,11 +58,11 @@ namespace LKZ.Server.Network
         {
             EventManager.RegisterEvent("LobbyCreatedMessage", ApproachHandler.HandleLobbyCreatedMessage);
             EventManager.RegisterEvent("LobbyListMessage", ApproachHandler.HandleLobbyListMessage);
-
-            EventManager.RegisterEvent("PlayerCreatedMessage", PlayerHandler.HandlePlayerCreatedMessage);
-            EventManager.RegisterEvent("PlayerMoveMessage", PlayerHandler.HandlePlayerMoveMessage);
-            EventManager.RegisterEvent("SendPrivateChatMessage", ChatHandler.HandleChatMessageMessage);
-            EventManager.RegisterEvent("PlayerRotationMessage", PlayerHandler.HandlePlayerRotationMessage);
+            EventManager.RegisterEvent("EntityCreatedMessage", EntityHandler.HandleEntityCreatedMessage);
+            //EventManager.RegisterEvent("PlayerCreatedMessage", PlayerHandler.HandlePlayerCreatedMessage);
+            //EventManager.RegisterEvent("PlayerMoveMessage", PlayerHandler.HandlePlayerMoveMessage);
+            //EventManager.RegisterEvent("SendPrivateChatMessage", ChatHandler.HandleChatMessageMessage);
+            //EventManager.RegisterEvent("PlayerRotationMessage", PlayerHandler.HandlePlayerRotationMessage);
         }
 
         private static async Task AcceptClients()
@@ -126,7 +127,7 @@ namespace LKZ.Server.Network
             Console.ResetColor();
         }
 
-        private static void HandleDataReceived(object sender, string message, TcpClient client)
+        private static void HandleDataReceived(object sender, string message, TcpClient tcpClient)
         {
             string[] messages = message.Split('~', StringSplitOptions.RemoveEmptyEntries);
 
@@ -136,22 +137,24 @@ namespace LKZ.Server.Network
 
                 if (parts[0] == "ClientCreatedMessage")
                 {
-                    AddClient(new BaseClient(NextClientId, client));
+                    AddClient(new BaseClient(NextClientId, tcpClient));
                     BaseServer.NextClientId++;
                 }
 
-                uint clientId = clients.First(x => x.TcpClient == client).Id;
+                BaseClient client = clients.First(x => x.TcpClient == tcpClient);
 
-                if (clientId == 0)
+                if (client.Id == 0)
                 {
                     Console.WriteLine("Client non trouvé.");
                     return; 
                 }
 
-                EventManager.TriggerRaw($"{parts[0]}|{clientId}|{parts[1]}");
+
+
+                EventManager.TriggerRaw(client, $"{parts[0]}|{parts[1]}");
 
                 Console.ForegroundColor = ConsoleColor.Yellow;
-                Console.WriteLine($"({client.Client.RemoteEndPoint}) Message received : {parts[0]} (ID: {clientId}, Parameters: {parts[1]})");
+                Console.WriteLine($"({tcpClient.Client.RemoteEndPoint}) Message received : {parts[0]} (ID: {client.Id}, Parameters: {parts[1]})");
                 Console.ResetColor();
             }
         }
@@ -214,47 +217,67 @@ namespace LKZ.Server.Network
         /// clientId = -2 = sends the event to all clients except the client in the first parameter.
         ///clientId = -1 = sends the event to all clients.
         /// </summary>
-        public static void TriggerClientEvent(int clientId, string eventName, params object[] parameters)
+        public static void TriggerClientEvent(int clientId, string eventName, int lobbyId = -1, params object[] parameters)
         {
             string fullMessage = EventManager.Serialize(eventName, parameters);
             Debug.WriteLine(fullMessage);
             byte[] data = Encoding.ASCII.GetBytes(fullMessage);
 
-            if (clientId == -1)
+            // Check if a valid lobby ID is provided
+            if (lobbyId > 0)
             {
-                foreach (var client in clients)
+                Lobby lobby = LobbyManager.GetLobby(lobbyId);
+                if (lobby != null)
                 {
-                    client.TcpClient.GetStream().Write(data, 0, data.Length);
-                }
-            }
-            else if (clientId == -2 && parameters.Length > 0 && parameters[0] is int excludeClientId)
-            {
-                foreach (var client in clients)
-                {
-                    if (client.Id != excludeClientId) 
+                    // Case 1: Send to all clients in the specified lobby
+                    if (clientId == -1)
                     {
-                        client.TcpClient.GetStream().Write(data, 0, data.Length);
+                        foreach (var client in lobby.Clients)
+                        {
+                            client.TcpClient.GetStream().Write(data, 0, data.Length);
+                        }
                     }
-                }
-            }
-            else if (clientId > 0)
-            {
-                TcpClient tcpClient = GetClient((uint)clientId).TcpClient;
-
-                if (tcpClient != null)
-                {
-                    tcpClient.GetStream().Write(data, 0, data.Length);
-
+                    // Case 2: Send to a specific client in the lobby
+                    else if (clientId > 0)
+                    {
+                        var targetClient = lobby.Clients.FirstOrDefault(c => c.Id == clientId);
+                        if (targetClient != null)
+                        {
+                            targetClient.TcpClient.GetStream().Write(data, 0, data.Length);
+                        }
+                        else
+                        {
+                            Console.WriteLine($"Client {clientId} not found in lobby {lobbyId}.");
+                        }
+                    }
+                    // Case 3: Send to all clients in the lobby except the specified one
+                    else if (clientId == -2 && parameters.Length > 0 && parameters[0] is int excludeClientId)
+                    {
+                        foreach (var client in lobby.Clients)
+                        {
+                            if (client.Id != excludeClientId)
+                            {
+                                client.TcpClient.GetStream().Write(data, 0, data.Length);
+                            }
+                        }
+                    }
                 }
                 else
                 {
-                    Console.WriteLine($"Client {clientId} not found.");
+                    Console.WriteLine($"Lobby {lobbyId} not found.");
                 }
             }
+            else
+            {
+                Console.WriteLine("Invalid lobby ID.");
+            }
+
             Console.ForegroundColor = ConsoleColor.Cyan;
-            Console.WriteLine($"({clientId}) Message sent : {eventName} ({parameters.Length.ToString()})");
+            Console.WriteLine($"({clientId}) Message sent: {eventName} ({parameters.Length})");
             Console.ResetColor();
         }
+
+
 
         //public static void ListClients()
         //{
