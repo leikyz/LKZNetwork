@@ -16,8 +16,20 @@ namespace LKZ.Network.Server.Handlers.Approach
 
             Console.WriteLine($"Lobby '{lobby.LobbyId}' created.");
 
-            BaseServer.TriggerClientEvent(-1, "LobbyCreatedMessage", lobby.LobbyId, lobby.LobbyId);
+            BaseServer.TriggerGlobalEvent("LobbyCreatedMessage", lobby.LobbyId);
            
+        }
+
+        static public void HandleLobbyJoinedMessage(BaseClient client, string[] parameters)
+        {
+            int lobbyId = int.Parse(parameters[0]);
+
+            Lobby lobby = LobbyManager.GetLobby(lobbyId);
+            lobby.AddClient(client);
+            client.Lobby = lobby;
+
+            BaseServer.TriggerClientEvent((int)client.Id, "LobbyJoinedMessage", lobby.LobbyId, lobbyId);
+
         }
 
         static public void HandleLobbyListMessage(BaseClient client, string[] parameters)

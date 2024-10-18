@@ -59,6 +59,7 @@ namespace LKZ.Server.Network
             EventManager.RegisterEvent("LobbyCreatedMessage", ApproachHandler.HandleLobbyCreatedMessage);
             EventManager.RegisterEvent("LobbyListMessage", ApproachHandler.HandleLobbyListMessage);
             EventManager.RegisterEvent("EntityCreatedMessage", EntityHandler.HandleEntityCreatedMessage);
+            EventManager.RegisterEvent("LobbyJoinedMessage", ApproachHandler.HandleLobbyJoinedMessage);
             //EventManager.RegisterEvent("PlayerCreatedMessage", PlayerHandler.HandlePlayerCreatedMessage);
             //EventManager.RegisterEvent("PlayerMoveMessage", PlayerHandler.HandlePlayerMoveMessage);
             //EventManager.RegisterEvent("SendPrivateChatMessage", ChatHandler.HandleChatMessageMessage);
@@ -130,9 +131,9 @@ namespace LKZ.Server.Network
         private static void HandleDataReceived(object sender, string message, TcpClient tcpClient)
         {
             string[] messages = message.Split('~', StringSplitOptions.RemoveEmptyEntries);
-
             foreach (var msg in messages)
             {
+                
                 var parts = msg.Split('|');
 
                 if (parts[0] == "ClientCreatedMessage")
@@ -140,8 +141,8 @@ namespace LKZ.Server.Network
                     AddClient(new BaseClient(NextClientId, tcpClient));
                     BaseServer.NextClientId++;
                 }
+                BaseClient client = clients.FirstOrDefault(x => x.TcpClient == tcpClient);
 
-                BaseClient client = clients.First(x => x.TcpClient == tcpClient);
 
                 if (client.Id == 0)
                 {
@@ -217,6 +218,31 @@ namespace LKZ.Server.Network
         /// clientId = -2 = sends the event to all clients except the client in the first parameter.
         ///clientId = -1 = sends the event to all clients.
         /// </summary>
+        /// 
+
+        public static void TriggerGlobalEvent(string eventName, params object[] parameters)
+        {
+            string fullMessage = EventManager.Serialize(eventName, parameters);
+            Debug.WriteLine(fullMessage);
+            byte[] data = Encoding.ASCII.GetBytes(fullMessage);
+
+            // Iterate over all connected clients and send the message
+            foreach (var client in clients)
+            {
+                try
+                {
+                    client.TcpClient.GetStream().Write(data, 0, data.Length);
+                    Console.ForegroundColor = ConsoleColor.Cyan;
+                 //   Console.WriteLine($"Message sent to client {client.Id}: {eventName} ({parameters.Length})");
+                    Console.ResetColor();
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Error sending message to client {client.Id}: {ex.Message}");
+                }
+            }
+        }
+
         public static void TriggerClientEvent(int clientId, string eventName, int lobbyId = -1, params object[] parameters)
         {
             string fullMessage = EventManager.Serialize(eventName, parameters);

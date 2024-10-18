@@ -14,6 +14,7 @@ namespace LKZ.Server.Managers
         {
             LobbyId = id;
             clients = new List<BaseClient>();
+            entities = new List<Entity>();
         }
 
         public void AddClient(BaseClient client)
