@@ -4,6 +4,7 @@ using LKZ.Server.Handlers.Chat;
 using LKZ.Server.Handlers.Players;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
@@ -22,7 +23,7 @@ namespace LKZ.Server.Network
 
         private static TcpListener _server;
         private static bool _isRunning;
-        private static Dictionary<uint, TcpClient> clients = new Dictionary<uint, TcpClient>();
+        private static List<BaseClient> clients = new List<BaseClient>();
         public static uint NextClientId = 1;
         // Event delegates
         public delegate void ClientConnectedEventHandler(object sender, TcpClient client);
@@ -98,7 +99,6 @@ namespace LKZ.Server.Network
                         break; // if there is no data
 
                     string message = Encoding.ASCII.GetString(buffer, 0, bytesRead);
-
   
                     if (message.Length > MAX_BUFFER_SIZE) 
                     {
@@ -128,7 +128,6 @@ namespace LKZ.Server.Network
 
         private static void HandleDataReceived(object sender, string message, TcpClient client)
         {
-
             string[] messages = message.Split('~', StringSplitOptions.RemoveEmptyEntries);
 
             foreach (var msg in messages)
@@ -137,45 +136,55 @@ namespace LKZ.Server.Network
 
                 if (parts[0] == "ClientCreatedMessage")
                 {
-                    AddClient(BaseServer.NextClientId, client);
+                    AddClient(new BaseClient(NextClientId, client));
                     BaseServer.NextClientId++;
                 }
 
-                EventManager.TriggerRaw(msg);
+                uint clientId = clients.First(x => x.TcpClient == client).Id;
+
+                if (clientId == 0)
+                {
+                    Console.WriteLine("Client non trouvé.");
+                    return; 
+                }
+
+                EventManager.TriggerRaw($"{parts[0]}|{clientId}|{parts[1]}");
+
                 Console.ForegroundColor = ConsoleColor.Yellow;
-                Console.WriteLine($"({client.Client.RemoteEndPoint}) Message received : {parts[0]} ({parts[1]})");
+                Console.WriteLine($"({client.Client.RemoteEndPoint}) Message received : {parts[0]} (ID: {clientId}, Parameters: {parts[1]})");
                 Console.ResetColor();
             }
         }
 
 
-        public static void AddClient(uint id, TcpClient client)
+        public static void AddClient(BaseClient client)
         {
             try
             {
                 Console.ForegroundColor = ConsoleColor.Green;
-                if (!clients.ContainsKey(id))
+                if (!clients.Contains(client))
                 {
-                    clients.Add(id, client);
-                   
-                    Console.WriteLine($"({client.Client.RemoteEndPoint}) Client with ID {id} connected successfully.");
+                    clients.Add(client);
+                    Console.WriteLine($"({client.TcpClient.Client.RemoteEndPoint}) Client with ID {client.Id} connected successfully.");
                 }
                 else
                 {
-                    Console.WriteLine($"Client with ID {id} already exists.");
+                    Console.WriteLine($"Client with ID {client.Id} already exists.");
                 }
-
                 Console.ResetColor();
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error adding client with ID {id}: {ex.Message}");
+                Console.WriteLine($"Error adding client with ID {client.Id}: {ex.Message}");
             }
         }
 
-        public static TcpClient GetTcpClient(uint id)
+
+        public static BaseClient GetClient(uint id)
         {
-            if (clients.TryGetValue(id, out TcpClient client))
+            BaseClient client = clients.FirstOrDefault(c => c.Id == id);
+
+            if (client != null)
             {
                 return client;
             }
@@ -185,6 +194,20 @@ namespace LKZ.Server.Network
                 return null;
             }
         }
+
+
+        //public static TcpClient GetTcpClient(string id)
+        //{
+        //    if (clients.TryGetValue(id, out TcpClient client))
+        //    {
+        //        return client;
+        //    }
+        //    else
+        //    {
+        //        Console.WriteLine($"Client with ID {id} not found.");
+        //        return null;
+        //    }
+        //}
         /// <summary>
         /// Triggers an event for the client:
         /// clientId > 0 = sends the event to the specified client.
@@ -193,32 +216,30 @@ namespace LKZ.Server.Network
         /// </summary>
         public static void TriggerClientEvent(int clientId, string eventName, params object[] parameters)
         {
-            string fullMessage = EventManager.Serialize(eventName, clientId.ToString(), parameters);
+            string fullMessage = EventManager.Serialize(eventName, parameters);
+            Debug.WriteLine(fullMessage);
             byte[] data = Encoding.ASCII.GetBytes(fullMessage);
 
-            // Cas où l'on envoie à tous les clients (clientId == -1)
             if (clientId == -1)
             {
                 foreach (var client in clients)
                 {
-                    client.Value.GetStream().Write(data, 0, data.Length);
+                    client.TcpClient.GetStream().Write(data, 0, data.Length);
                 }
             }
-            // Cas où l'on envoie à tous les clients sauf un (clientId == -2)
             else if (clientId == -2 && parameters.Length > 0 && parameters[0] is int excludeClientId)
             {
                 foreach (var client in clients)
                 {
-                    if (client.Key != excludeClientId) // Ne pas envoyer au client spécifié en premier paramètre
+                    if (client.Id != excludeClientId) 
                     {
-                        client.Value.GetStream().Write(data, 0, data.Length);
+                        client.TcpClient.GetStream().Write(data, 0, data.Length);
                     }
                 }
             }
-            // Cas où l'on envoie à un client spécifique (clientId > 0)
             else if (clientId > 0)
             {
-                TcpClient tcpClient = GetTcpClient((uint)clientId);
+                TcpClient tcpClient = GetClient((uint)clientId).TcpClient;
 
                 if (tcpClient != null)
                 {
@@ -231,23 +252,23 @@ namespace LKZ.Server.Network
                 }
             }
             Console.ForegroundColor = ConsoleColor.Cyan;
-            Console.WriteLine($"({clientId}) Message sent : {eventName} ({parameters.ToString()})");
+            Console.WriteLine($"({clientId}) Message sent : {eventName} ({parameters.Length.ToString()})");
             Console.ResetColor();
         }
 
-        public static void ListClients()
-        {
-            if (clients.Count == 0)
-            {
-                Console.WriteLine("No clients connected.");
-                return;
-            }
+        //public static void ListClients()
+        //{
+        //    if (clients.Count == 0)
+        //    {
+        //        Console.WriteLine("No clients connected.");
+        //        return;
+        //    }
 
-            Console.WriteLine("Connected clients:");
-            foreach (var client in clients)
-            {
-                Console.WriteLine($"Client ID: {client.Key}, Remote EndPoint: {client.Value.Client.RemoteEndPoint}");
-            }
-        }
+        //    Console.WriteLine("Connected clients:");
+        //    foreach (var client in clients)
+        //    {
+        //        Console.WriteLine($"Client ID: {client.Key}, Remote EndPoint: {client.Value.Client.RemoteEndPoint}");
+        //    }
+        //}
     }
 }

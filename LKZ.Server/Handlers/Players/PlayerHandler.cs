@@ -7,10 +7,10 @@ namespace LKZ.Server.Handlers.Players
     {
         static public void HandlePlayerCreatedMessage(string[] parameters)
         {
-            //if (!EventManager.ValidateParameters(parameters, 1))
-            //    return;
+            if (!EventManager.ValidateParameters(parameters, 1))
+                return;
 
-            //int sendId = Int32.Parse(parameters[0]);
+            BaseServer.GetClient(uint.Parse(parameters[0]));
 
             //LobbyManager.AddPlayerToLobby(sendId);
 
