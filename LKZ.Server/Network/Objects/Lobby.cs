@@ -18,6 +18,8 @@ namespace LKZ.Server.Network.Objects
             entities = new List<NetworkEntity>();
         }
 
+        public List<NetworkEntity> Entities => entities;    
+
         public void AddClient(BaseClient client)
         {
             if (!clients.Contains(client))

@@ -57,9 +57,11 @@ namespace LKZ.Server.Network
         private static void RegisterEvents()
         {
             EventManager.RegisterEvent("LobbyCreatedMessage", ApproachHandler.HandleLobbyCreatedMessage);
-            EventManager.RegisterEvent("LobbyListMessage", ApproachHandler.HandleLobbyListMessage);
-            EventManager.RegisterEvent("EntityCreatedMessage", EntityHandler.HandleEntityCreatedMessage);
+            EventManager.RegisterEvent("LobbyListMessage", ApproachHandler.HandleLobbyListMessage);      
             EventManager.RegisterEvent("LobbyJoinedMessage", ApproachHandler.HandleLobbyJoinedMessage);
+
+            EventManager.RegisterEvent("EntityCreatedMessage", EntityHandler.HandleEntityCreatedMessage);
+            EventManager.RegisterEvent("SynchronizeEntitiesMessage", EntityHandler.HandleSynchronizeEntities);
         }
 
         private static async Task AcceptClients()
