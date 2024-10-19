@@ -1,6 +1,7 @@
 ﻿using LKZ.Network.Common.Events;
 using LKZ.Server.Managers; // Assurer d'inclure le namespace du LobbyManager et PlayerManager
 using LKZ.Server.Network;
+using LKZ.Server.Network.Objects;
 using System;
 using System.Collections.Generic;
 

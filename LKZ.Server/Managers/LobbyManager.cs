@@ -2,50 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection.Metadata.Ecma335;
+using LKZ.Server.Network.Objects;
 
 namespace LKZ.Server.Managers
 {
-    public class Lobby
-    {
-        public int LobbyId { get; private set; }
-        private List<BaseClient> clients;
-        private List<Entity> entities;
-        public Lobby(int id)
-        {
-            LobbyId = id;
-            clients = new List<BaseClient>();
-            entities = new List<Entity>();
-        }
-
-        public void AddClient(BaseClient client)
-        {
-            if (!clients.Contains(client))
-            {
-                clients.Add(client);
-            }
-        }
-
-        public void AddEntity(Entity entity)
-        {
-            if (!entities.Contains(entity))
-            {
-                entities.Add(entity);
-            }
-        }
-
-        public void RemovePlayer(BaseClient client)
-        {
-            if (clients.Contains(client))
-            {
-                clients.Remove(client);
-            }
-        }
-
-        public List<BaseClient> Clients => clients;
-
-        public int ClientsCount => clients.Count;  
-    }
-
+  
     public static class LobbyManager
     {
         private static List<Lobby> lobbies = new List<Lobby>();

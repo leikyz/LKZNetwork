@@ -1,6 +1,8 @@
 ﻿using LKZ.Server.Network;
 using LKZ.Server.Managers;
 using LKZ.Network.Common.Events;
+using LKZ.Server.Network.Objects;
+
 namespace LKZ.Server.Handlers.Entity
 {
     static public class EntityHandler
@@ -12,7 +14,7 @@ namespace LKZ.Server.Handlers.Entity
             if (entityType == 1) // player   
                 client.PlayerId = BaseServer.NextEntityId;
 
-            client.Lobby.AddEntity(new Managers.Entity(BaseServer.NextEntityId));
+            client.Lobby.AddEntity(new NetworkEntity(BaseServer.NextEntityId));
                   
             BaseServer.TriggerClientEvent(-1, "EntityCreatedMessage", client.Lobby.LobbyId, BaseServer.NextEntityId, entityType);
 

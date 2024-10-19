@@ -2,6 +2,7 @@
 using LKZ.Network.Server.Handlers.Approach;
 using LKZ.Server.Handlers.Entity;
 using LKZ.Server.Managers;
+using LKZ.Server.Network.Objects;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -48,7 +49,6 @@ namespace LKZ.Server.Network
             OnClientDisconnected += HandleClientDisconnected;
             OnDataReceived += HandleDataReceived;
             
-            // Continuously accept new clients in a loop
             Task.Run(() => AcceptClients());
 
             RegisterEvents();
@@ -60,10 +60,6 @@ namespace LKZ.Server.Network
             EventManager.RegisterEvent("LobbyListMessage", ApproachHandler.HandleLobbyListMessage);
             EventManager.RegisterEvent("EntityCreatedMessage", EntityHandler.HandleEntityCreatedMessage);
             EventManager.RegisterEvent("LobbyJoinedMessage", ApproachHandler.HandleLobbyJoinedMessage);
-            //EventManager.RegisterEvent("PlayerCreatedMessage", PlayerHandler.HandlePlayerCreatedMessage);
-            //EventManager.RegisterEvent("PlayerMoveMessage", PlayerHandler.HandlePlayerMoveMessage);
-            //EventManager.RegisterEvent("SendPrivateChatMessage", ChatHandler.HandleChatMessageMessage);
-            //EventManager.RegisterEvent("PlayerRotationMessage", PlayerHandler.HandlePlayerRotationMessage);
         }
 
         private static async Task AcceptClients()
@@ -199,27 +195,6 @@ namespace LKZ.Server.Network
             }
         }
 
-
-        //public static TcpClient GetTcpClient(string id)
-        //{
-        //    if (clients.TryGetValue(id, out TcpClient client))
-        //    {
-        //        return client;
-        //    }
-        //    else
-        //    {
-        //        Console.WriteLine($"Client with ID {id} not found.");
-        //        return null;
-        //    }
-        //}
-        /// <summary>
-        /// Triggers an event for the client:
-        /// clientId > 0 = sends the event to the specified client.
-        /// clientId = -2 = sends the event to all clients except the client in the first parameter.
-        ///clientId = -1 = sends the event to all clients.
-        /// </summary>
-        /// 
-
         public static void TriggerGlobalEvent(string eventName, params object[] parameters)
         {
             string fullMessage = EventManager.Serialize(eventName, parameters);
@@ -233,7 +208,6 @@ namespace LKZ.Server.Network
                 {
                     client.TcpClient.GetStream().Write(data, 0, data.Length);
                     Console.ForegroundColor = ConsoleColor.Cyan;
-                 //   Console.WriteLine($"Message sent to client {client.Id}: {eventName} ({parameters.Length})");
                     Console.ResetColor();
                 }
                 catch (Exception ex)
@@ -249,7 +223,6 @@ namespace LKZ.Server.Network
             Debug.WriteLine(fullMessage);
             byte[] data = Encoding.ASCII.GetBytes(fullMessage);
 
-            // Check if a valid lobby ID is provided
             if (lobbyId > 0)
             {
                 Lobby lobby = LobbyManager.GetLobby(lobbyId);
@@ -302,22 +275,5 @@ namespace LKZ.Server.Network
             Console.WriteLine($"({clientId}) Message sent: {eventName} ({parameters.Length})");
             Console.ResetColor();
         }
-
-
-
-        //public static void ListClients()
-        //{
-        //    if (clients.Count == 0)
-        //    {
-        //        Console.WriteLine("No clients connected.");
-        //        return;
-        //    }
-
-        //    Console.WriteLine("Connected clients:");
-        //    foreach (var client in clients)
-        //    {
-        //        Console.WriteLine($"Client ID: {client.Key}, Remote EndPoint: {client.Value.Client.RemoteEndPoint}");
-        //    }
-        //}
     }
 }
