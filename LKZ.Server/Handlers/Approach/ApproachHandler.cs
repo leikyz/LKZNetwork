@@ -35,16 +35,18 @@ namespace LKZ.Network.Server.Handlers.Approach
 
         static public void HandleLobbyListMessage(BaseClient client, string[] parameters)
         {
-            //List<Lobby> allLobbies = LobbyManager.GetAllLobbies();
+            List<Lobby> allLobbies = LobbyManager.GetAllLobbies();
 
-            //List<string> lobbyInfoList = new List<string>();
-            //foreach (var lobby in allLobbies)
-            //{
-            //    lobbyInfoList.Add($"{lobby.LobbyId}^{lobby.ClientsCount}");
-            //}
-            //string lobbiesString = string.Join("$", lobbyInfoList);
+            List<string> lobbyInfoList = new List<string>();
+            foreach (var lobby in allLobbies)
+            {
+                lobbyInfoList.Add($"{lobby.LobbyId}^{lobby.ClientsCount}");
+            }
+            string lobbiesString = string.Join("$", lobbyInfoList);
 
-            //BaseServer.TriggerClientEvent(int.Parse(parameters[0]), "LobbyListMessage", lobbiesString);
+
+            //send to a specific client (no matter lobby)
+            BaseServer.TriggerClientEvent((int)client.Id, "LobbyListMessage", -1, lobbiesString);
 
         }
 

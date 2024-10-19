@@ -11,7 +11,6 @@ namespace LKZ.Server.Managers
     {
         private static List<Lobby> lobbies = new List<Lobby>();
         private static int nextLobbyId = 1; 
-
         public static Lobby CreateLobby()
         {
             Lobby newLobby = new Lobby(nextLobbyId);

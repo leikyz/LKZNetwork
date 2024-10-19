@@ -61,7 +61,9 @@ namespace LKZ.Server.Network
             EventManager.RegisterEvent("LobbyJoinedMessage", ApproachHandler.HandleLobbyJoinedMessage);
 
             EventManager.RegisterEvent("EntityCreatedMessage", EntityHandler.HandleEntityCreatedMessage);
+            EventManager.RegisterEvent("EntityMovementMessage", EntityHandler.HandleEntityMovementMessage);
             EventManager.RegisterEvent("SynchronizeEntitiesMessage", EntityHandler.HandleSynchronizeEntities);
+            EventManager.RegisterEvent("EntityRotationMessage", EntityHandler.HandleEntityRotationMessage);
         }
 
         private static async Task AcceptClients()
@@ -252,20 +254,34 @@ namespace LKZ.Server.Network
                         }
                     }
                     // Case 3: Send to all clients in the lobby except the specified one
-                    else if (clientId == -2 && parameters.Length > 0 && parameters[0] is int excludeClientId)
+                    else if (clientId == -2)
                     {
                         foreach (var client in lobby.Clients)
                         {
-                            if (client.Id != excludeClientId)
+                            if (client.Id != uint.Parse(parameters[0].ToString()))
                             {
                                 client.TcpClient.GetStream().Write(data, 0, data.Length);
                             }
+
                         }
                     }
                 }
+
                 else
                 {
                     Console.WriteLine($"Lobby {lobbyId} not found.");
+                }
+            }
+            else if (clientId > 0)
+            {
+                var targetClient = clients.FirstOrDefault(c => c.Id == clientId);
+                if (targetClient != null)
+                {
+                    targetClient.TcpClient.GetStream().Write(data, 0, data.Length);
+                }
+                else
+                {
+                    Console.WriteLine($"Client {clientId} not found in lobby {lobbyId}.");
                 }
             }
             else
@@ -273,9 +289,9 @@ namespace LKZ.Server.Network
                 Console.WriteLine("Invalid lobby ID.");
             }
 
-            Console.ForegroundColor = ConsoleColor.Cyan;
-            Console.WriteLine($"({clientId}) Message sent: {eventName} ({parameters.Length})");
-            Console.ResetColor();
+            //Console.ForegroundColor = ConsoleColor.Cyan;
+            //Console.WriteLine($"({clientId}) Message sent: {eventName} ({parameters.Length})");
+            //Console.ResetColor();
         }
     }
 }

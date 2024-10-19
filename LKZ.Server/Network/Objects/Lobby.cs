@@ -11,11 +11,13 @@ namespace LKZ.Server.Network.Objects
         public int LobbyId { get; private set; }
         private List<BaseClient> clients;
         private List<NetworkEntity> entities;
+        private int spawnIndex;
         public Lobby(int id)
         {
             LobbyId = id;
             clients = new List<BaseClient>();
             entities = new List<NetworkEntity>();
+            spawnIndex = 0;
         }
 
         public List<NetworkEntity> Entities => entities;    
@@ -47,6 +49,12 @@ namespace LKZ.Server.Network.Objects
         public List<BaseClient> Clients => clients;
 
         public int ClientsCount => clients.Count;
+
+        public int SpawnIndex
+        {
+            get { return spawnIndex; }
+            set { spawnIndex = value; }
+        }
     }
 
 }
