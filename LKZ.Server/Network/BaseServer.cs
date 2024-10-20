@@ -56,14 +56,15 @@ namespace LKZ.Server.Network
 
         private static void RegisterEvents()
         {
+            EventManager.RegisterEvent("OnlinePlayersCountMessage", ApproachHandler.HandleOnlinePlayerCountMessage);
             EventManager.RegisterEvent("LobbyCreatedMessage", ApproachHandler.HandleLobbyCreatedMessage);
             EventManager.RegisterEvent("LobbyListMessage", ApproachHandler.HandleLobbyListMessage);      
             EventManager.RegisterEvent("LobbyJoinedMessage", ApproachHandler.HandleLobbyJoinedMessage);
 
             EventManager.RegisterEvent("EntityCreatedMessage", EntityHandler.HandleEntityCreatedMessage);
-            EventManager.RegisterEvent("EntityMovementMessage", EntityHandler.HandleEntityMovementMessage);
-            EventManager.RegisterEvent("SynchronizeEntitiesMessage", EntityHandler.HandleSynchronizeEntities);
+            EventManager.RegisterEvent("EntityMovementMessage", EntityHandler.HandleEntityMovementMessage);         
             EventManager.RegisterEvent("EntityRotationMessage", EntityHandler.HandleEntityRotationMessage);
+            EventManager.RegisterEvent("SynchronizeEntitiesMessage", EntityHandler.HandleSynchronizeEntities);
         }
 
         private static async Task AcceptClients()
@@ -272,6 +273,7 @@ namespace LKZ.Server.Network
                     Console.WriteLine($"Lobby {lobbyId} not found.");
                 }
             }
+            // send to a client without lobby
             else if (clientId > 0)
             {
                 var targetClient = clients.FirstOrDefault(c => c.Id == clientId);
@@ -293,5 +295,7 @@ namespace LKZ.Server.Network
             //Console.WriteLine($"({clientId}) Message sent: {eventName} ({parameters.Length})");
             //Console.ResetColor();
         }
+
+        public static int ClientsCount => clients.Count;   
     }
 }

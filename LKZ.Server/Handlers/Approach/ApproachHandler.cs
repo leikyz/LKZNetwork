@@ -9,11 +9,16 @@ namespace LKZ.Network.Server.Handlers.Approach
 {
     static public class ApproachHandler
     {
+        static public void HandleOnlinePlayerCountMessage(BaseClient client, string[] parameters)
+        {
+            BaseServer.TriggerClientEvent((int)client.Id, "OnlinePlayerCountMessage", -1, BaseServer.ClientsCount);
+        }
+
         static public void HandleLobbyCreatedMessage(BaseClient client, string[] parameters)
         {
             var lobby = LobbyManager.CreateLobby();
-            lobby.AddClient(client);
-            client.Lobby = lobby;
+            //lobby.AddClient(client);
+            //client.Lobby = lobby;
 
             Console.WriteLine($"Lobby '{lobby.LobbyId}' created.");
 

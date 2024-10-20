@@ -67,11 +67,8 @@ namespace LKZ.Server.Handlers.Entity
         static public void HandleEntityRotationMessage(BaseClient client, string[] parameters)
         {
 
-            uint entityId = uint.Parse(parameters[0]);
-            float x = float.Parse(parameters[1]);
-            float y = float.Parse(parameters[2]);
-            float z = float.Parse(parameters[3]);
-
+            if (!EventManager.ValidateParameters(parameters, 4))
+                return;
 
             BaseServer.TriggerClientEvent(-2, "EntityRotationMessage", client.Lobby.LobbyId, client.Id,
                 parameters[0], parameters[1], parameters[2], parameters[3]);
