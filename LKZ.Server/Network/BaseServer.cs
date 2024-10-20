@@ -137,12 +137,21 @@ namespace LKZ.Server.Network
                 
                 var parts = msg.Split('|');
 
+                if (parts.Length < 2)
+                {
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine($"Format incorrect pour le message : {msg}");
+                    Console.ResetColor();
+                    continue; 
+                }
+
                 if (parts[0] == "ClientCreatedMessage")
                 {
                     AddClient(new BaseClient(NextClientId, tcpClient));
                     BaseServer.NextClientId++;
                 }
                 BaseClient client = clients.FirstOrDefault(x => x.TcpClient == tcpClient);
+
 
 
                 if (client.Id == 0)

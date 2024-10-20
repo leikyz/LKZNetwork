@@ -57,6 +57,9 @@ namespace LKZ.Server.Handlers.Entity
         }
         static public void HandleEntityMovementMessage(BaseClient client, string[] parameters)
         {
+            if (!EventManager.ValidateParameters(parameters, 3))
+                return;
+
             uint entityId = uint.Parse(parameters[0]);
             float vertical = float.Parse(parameters[1]);
             bool isRunning = bool.Parse(parameters[2]);
