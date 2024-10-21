@@ -8,13 +8,18 @@ public class BaseClient
     private TcpClient tcpClient;
     private uint playerId;
     private Lobby lobby;
-
+    private int ping = 100; //ms
     public BaseClient(uint id, TcpClient tcpClient)
     {
         Id = id;
         TcpClient = tcpClient;
     }
 
+    public int Ping
+    {
+        get { return ping; }
+        set { ping = value; }
+    }
     public uint Id
     {
         get { return id; }

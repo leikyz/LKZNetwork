@@ -61,6 +61,7 @@ namespace LKZ.Server.Network
             EventManager.RegisterEvent("LobbyListMessage", ApproachHandler.HandleLobbyListMessage);      
             EventManager.RegisterEvent("LobbyJoinedMessage", ApproachHandler.HandleLobbyJoinedMessage);
 
+            EventManager.RegisterEvent("EntityLastPositionMessage", EntityHandler.HandleEntityLastPositionMessage);
             EventManager.RegisterEvent("EntityCreatedMessage", EntityHandler.HandleEntityCreatedMessage);
             EventManager.RegisterEvent("EntityMovementMessage", EntityHandler.HandleEntityMovementMessage);         
             EventManager.RegisterEvent("EntityRotationMessage", EntityHandler.HandleEntityRotationMessage);

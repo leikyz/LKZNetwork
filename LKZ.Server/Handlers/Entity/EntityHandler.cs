@@ -76,6 +76,15 @@ namespace LKZ.Server.Handlers.Entity
             BaseServer.TriggerClientEvent(-2, "EntityRotationMessage", client.Lobby.LobbyId, client.Id,
                 parameters[0], parameters[1], parameters[2], parameters[3]);
         }
+        static public void HandleEntityLastPositionMessage(BaseClient client, string[] parameters)
+        {
+            if (!EventManager.ValidateParameters(parameters, 4))
+                return;
+
+            BaseServer.TriggerClientEvent(-2, "EntityLastPositionMessage", client.Lobby.LobbyId, client.Id,
+                parameters[0], parameters[1], parameters[2], parameters[3]);
+        }
+
 
         //static public void HandleMoveEntityMessage(string[] parameters)
         //{
